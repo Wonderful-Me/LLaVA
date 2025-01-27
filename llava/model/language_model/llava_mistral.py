@@ -15,6 +15,7 @@
 
 from typing import List, Optional, Tuple, Union
 
+import time
 import torch
 import torch.nn as nn
 from torch.nn import CrossEntropyLoss
@@ -70,7 +71,13 @@ class LlavaMistralForCausalLM(MistralForCausalLM, LlavaMetaForCausalLM):
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
 
+
+        
         if inputs_embeds is None:
+            torch.cuda.synchronize()
+            st = time.time()    
+            print(f"start_time: {st}")
+            
             (
                 input_ids,
                 position_ids,
@@ -88,6 +95,10 @@ class LlavaMistralForCausalLM(MistralForCausalLM, LlavaMetaForCausalLM):
                 image_sizes
             )
 
+            torch.cuda.synchronize()
+            et = time.time()    
+            print(f"text_embed_time: {et - st}")
+            
         return super().forward(
             input_ids=input_ids,
             attention_mask=attention_mask,
